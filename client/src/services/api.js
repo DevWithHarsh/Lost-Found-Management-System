@@ -92,3 +92,114 @@ export const getFoundItems = async () => {
 
   return data;
 };
+// =========================
+// CLAIM REQUESTS
+// =========================
+
+export const createClaimRequest = async (itemId, reason) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/claims`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ itemId, reason }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to submit claim");
+  }
+
+  return data;
+};
+
+export const getMyClaims = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/claims/my`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch claims");
+  }
+
+  return data;
+};
+
+
+// =========================
+// ADMIN CLAIM MANAGEMENT
+// =========================
+
+export const getPendingClaims = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/claims/admin/pending`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch pending claims");
+  }
+
+  return data;
+};
+
+export const approveClaim = async (claimId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API_URL}/claims/admin/${claimId}/approve`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to approve claim");
+  }
+
+  return data;
+};
+
+export const rejectClaim = async (claimId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API_URL}/claims/admin/${claimId}/reject`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to reject claim");
+  }
+
+  return data;
+};

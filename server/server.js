@@ -26,6 +26,10 @@ app.use(
   "/api/found-items",
   require("./routes/foundItemRoutes")
 );
+app.use(
+  "/api/claims",
+  require("./routes/claimRoutes")
+);
 
 const PORT = process.env.PORT || 5000;
 

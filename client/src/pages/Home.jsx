@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import {
   createFoundItem,
   getFoundItems,
+  createClaimRequest,
 } from "../services/api";
 
 const categories = [
@@ -30,6 +31,10 @@ const Home = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [claimItem, setClaimItem] = useState(null);
+  const [claimReason, setClaimReason] = useState("");
+  const [claimLoading, setClaimLoading] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -91,6 +96,7 @@ const Home = () => {
         description: "",
         location: "",
         foundDate: "",
+        image: null,
       });
 
       setShowForm(false);
@@ -100,6 +106,32 @@ const Home = () => {
       setError(error.message);
     } finally {
       setFormLoading(false);
+    }
+  };
+
+  // =========================
+  // CLAIM HANDLERS
+  // =========================
+
+  const handleClaimSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!claimItem || !claimReason.trim()) return;
+
+    setError("");
+    setSuccess("");
+    setClaimLoading(true);
+
+    try {
+      await createClaimRequest(claimItem._id, claimReason);
+
+      setSuccess("Claim request submitted successfully!");
+      setClaimItem(null);
+      setClaimReason("");
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setClaimLoading(false);
     }
   };
 
@@ -418,11 +450,107 @@ const Home = () => {
                     Reported by{" "}
                     {item.reportedBy?.name}
                   </small>
+
+                  {item.status === "available" &&
+                    item.reportedBy?._id !== user?.id && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setError("");
+                          setSuccess("");
+                          setClaimItem(item);
+                          setClaimReason("");
+                        }}
+                        style={{
+                          marginTop: "15px",
+                          width: "100%",
+                        }}
+                      >
+                        Claim This Item
+                      </button>
+                    )}
                 </div>
               ))}
             </div>
           )}
         </section>
+
+        {/* CLAIM MODAL */}
+        {claimItem && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0, 0, 0, 0.65)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "20px",
+              zIndex: 1000,
+            }}
+          >
+            <form
+              onSubmit={handleClaimSubmit}
+              style={{
+                width: "100%",
+                maxWidth: "500px",
+                background: "#1a1a1f",
+                border: "1px solid #444",
+                borderRadius: "12px",
+                padding: "24px",
+                boxSizing: "border-box",
+              }}
+            >
+              <h2>Claim Item</h2>
+
+              <p>
+                You are claiming: <strong>{claimItem.name}</strong>
+              </p>
+              <p>
+                Explain why you believe this item belongs to you.
+              </p>
+
+              <textarea
+                value={claimReason}
+                onChange={(e) => setClaimReason(e.target.value)}
+                placeholder="Example: This is my black wallet. It has my college ID and initials inside."
+                rows="5"
+                required
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  resize: "vertical",
+                }}
+              />
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "15px",
+                }}
+              >
+                <button
+                  type="submit"
+                  disabled={claimLoading}
+                >
+                  {claimLoading ? "Submitting..." : "Submit Claim"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setClaimItem(null);
+                    setClaimReason("");
+                  }}
+                  disabled={claimLoading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </main>
     </div>
   );
