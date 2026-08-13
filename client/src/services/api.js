@@ -1,205 +1,43 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-export const signupUser = async (userData) => {
-  const response = await fetch(`${API_URL}/auth/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Signup failed");
-  }
-
+const request = async (path, options = {}) => {
+  const response = await fetch(`${API_URL}${path}`, options);
+  let data = {};
+  try { data = await response.json(); } catch { /* empty response */ }
+  if (!response.ok) throw new Error(data.message || "Something went wrong");
   return data;
 };
 
-export const loginUser = async (credentials) => {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(credentials),
-  });
+const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
-  const data = await response.json();
+export const signupUser = (userData) => request("/auth/signup", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(userData),
+});
 
-  if (!response.ok) {
-    throw new Error(data.message || "Login failed");
-  }
-
-  return data;
-};
-
-// =========================
-// FOUND ITEMS
-// =========================
+export const loginUser = (credentials) => request("/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(credentials),
+});
 
 export const createFoundItem = async (itemData) => {
-  const token = localStorage.getItem("token");
-
   const formData = new FormData();
-
-  formData.append("name", itemData.name);
-  formData.append("category", itemData.category);
-  formData.append("description", itemData.description);
-  formData.append("location", itemData.location);
-  formData.append("foundDate", itemData.foundDate);
-
-  if (itemData.image) {
-    formData.append("image", itemData.image);
-  }
-
-  const response = await fetch(`${API_URL}/found-items`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to report item"
-    );
-  }
-
-  return data;
+  ["name", "category", "description", "location", "foundDate"].forEach((key) => formData.append(key, itemData[key]));
+  if (itemData.image) formData.append("image", itemData.image);
+  return request("/found-items", { method: "POST", headers: authHeaders(), body: formData });
 };
 
-export const getFoundItems = async () => {
-  const token = localStorage.getItem("token");
+export const getFoundItems = () => request("/found-items", { headers: authHeaders() });
 
-  const response = await fetch(`${API_URL}/found-items`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const createClaimRequest = (itemId, reason) => request("/claims", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", ...authHeaders() },
+  body: JSON.stringify({ itemId, reason }),
+});
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to fetch items");
-  }
-
-  return data;
-};
-// =========================
-// CLAIM REQUESTS
-// =========================
-
-export const createClaimRequest = async (itemId, reason) => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(`${API_URL}/claims`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ itemId, reason }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to submit claim");
-  }
-
-  return data;
-};
-
-export const getMyClaims = async () => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(`${API_URL}/claims/my`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to fetch claims");
-  }
-
-  return data;
-};
-
-
-// =========================
-// ADMIN CLAIM MANAGEMENT
-// =========================
-
-export const getPendingClaims = async () => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(`${API_URL}/claims/admin/pending`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to fetch pending claims");
-  }
-
-  return data;
-};
-
-export const approveClaim = async (claimId) => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(
-    `${API_URL}/claims/admin/${claimId}/approve`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to approve claim");
-  }
-
-  return data;
-};
-
-export const rejectClaim = async (claimId) => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(
-    `${API_URL}/claims/admin/${claimId}/reject`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to reject claim");
-  }
-
-  return data;
-};
+export const getMyClaims = () => request("/claims/my", { headers: authHeaders() });
+export const getPendingClaims = () => request("/claims/admin/pending", { headers: authHeaders() });
+export const approveClaim = (claimId) => request(`/claims/admin/${claimId}/approve`, { method: "PATCH", headers: authHeaders() });
+export const rejectClaim = (claimId) => request(`/claims/admin/${claimId}/reject`, { method: "PATCH", headers: authHeaders() });
