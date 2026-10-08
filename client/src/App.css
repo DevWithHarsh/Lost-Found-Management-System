@@ -362,6 +362,68 @@
     font-size: 12px;
 }
 
+.reporter-box {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+}
+
+.founder-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.founder-phone:hover {
+    color: #fff;
+    background: rgba(56, 189, 248, 0.25);
+    border-color: rgba(56, 189, 248, 0.45);
+    transform: translateY(-1px);
+}
+
+.phone-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+}
+
+.copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    background: #171b25;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.copy-btn:hover {
+    color: #f1f5f9;
+    background: #202634;
+    border-color: #38bdf8;
+    transform: translateY(-1px);
+}
+
+.copy-btn .copied-icon {
+    color: #4ade80;
+}
+
 .form-card {
     margin-bottom: 26px;
     padding: 22px;

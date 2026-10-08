@@ -84,7 +84,7 @@ const createFoundItem = async (req, res) => {
 const getFoundItems = async (req, res) => {
   try {
     const items = await FoundItem.find()
-      .populate("reportedBy", "name email")
+      .populate("reportedBy", "name email phone")
       .sort({ createdAt: -1 });
 
     res.json({
