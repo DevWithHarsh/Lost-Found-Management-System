@@ -9,7 +9,7 @@ const app = express();
 
 // Allow the deployed frontend and local development
 const allowedOrigins = [
-  "https://lost-found-management-system-drlp.vercel.app/",
+  "https://lost-found-management-system-drlp.vercel.app",
   "http://localhost:5173",
 ];
 
