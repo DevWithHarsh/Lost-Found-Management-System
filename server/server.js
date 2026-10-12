@@ -10,6 +10,7 @@ const app = express();
 // Allow the deployed frontend and local development
 const allowedOrigins = [
   "https://lost-found-management-system-n63x.vercel.app",
+  "https://lost-found-management-system-n63x-b1k86l33t.vercel.app",
   "http://localhost:5173",
 ];
 
